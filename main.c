@@ -67,7 +67,7 @@ int check_digit( char *buf){
  * @return 입력 성공 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL, 종료 시 EXIT 반환
  */
 int input_number( int *num){
-	int return_value = FAIL;	/** 검사 성공 여부를 설정할 변수 */
+	int return_value = FAIL;	/** 입력 성공 여부를 설정할 변수 */
 	char buf[MAX_NUMS];			/** 입력 받을 문자열을 담을 변수 */
 
 	printf("\t| @ 입력 : ");
@@ -103,7 +103,7 @@ int input_number( int *num){
  * @return 입력 성공 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 int test4_odd_input_numbers( test4_odd_t *odd){
-	int return_value = SUCCESS;
+	int return_value = SUCCESS; /** 입력 성공 여부를 설정할 변수 */
 
 	if( odd == NULL){ /** 구조체 객체가 NULL 인 경우, 프로그램 종료 */
 		printf("\t| ! 입력 실패, 알 수 없는 객체 (NULL)\n");
@@ -160,15 +160,15 @@ void test4_odd_print_odd_numbers( test4_odd_t *odd){
 		int is_odd = 0;		/** 홀수 카운트 변수 */
 
 		printf("\n");
-		printf("\t| @ 총 입력 개수 : %d\n", odd->size);
+		printf("\t| @ 총 입력 개수 : %d\n\n", odd->size);
 		for( ; loop_index < odd->size; loop_index++){
-			if( odd->nums[loop_index] % 2 == 1){
+			if( odd->nums[loop_index] % 2 == 1){ /** 홀수만 선택 */
 				printf("\t| @ %d : %d\n", ( loop_index + 1), odd->nums[loop_index]);
 				is_odd++;
 			}
 		}
-		if( is_odd > 0)	printf("\t| @ 출력 성공\n");
-		else printf("\t| ! 출력 실패\n");
+		if( is_odd > 0)	printf("\n\t| @ 출력 성공\n");	/** 홀수 카운트가 0 보다 클 경우, 홀수 출력 성공 */
+		else printf("\n\t| ! 출력 실패\n");				/** 홀수 카운트가 0 보다 작거나 같을 경우, 홀수 출력 실패 */
 	}
 }
 
@@ -182,21 +182,21 @@ void test4_odd_print_odd_numbers( test4_odd_t *odd){
  * @return 반환값 없음
  */
 void main(){
-	int return_value = SUCCESS;
+	int return_value = SUCCESS; /** 함수 실행 성공 여부를 설정할 변수 */
 
-	test4_odd_t *odd = ( test4_odd_t*)malloc(sizeof( test4_odd_t));
+	test4_odd_t *odd = ( test4_odd_t*)malloc(sizeof( test4_odd_t)); /** 정수를 입력 받을 구조체를 할당해서 그 주소를 가지고 있는 구조체 포인터 변수 */
 	odd->size = -1;
 
-	return_value = test4_odd_input_numbers( odd);
+	return_value = test4_odd_input_numbers( odd); /** 입력 진행 */
 	if( return_value == FAIL){
 		printf("\t| ! 입력 실패, 프로그램 종료\n");
 		return ;
 	}
-	else{ /** return_value 가 EXIT 또는 SUCCESS 인 경우 */
+	else{ /** return_value 가 EXIT 또는 SUCCESS 인 경우, 출력 진행 */
 		test4_odd_print_odd_numbers( odd);
 	}
 
-	free( odd);
-	odd = NULL;
+	free( odd); /** 할당된 구조체 변수의 메모리를 해제 */
+	odd = NULL; /** 해제 완료 후, 해제했던 구조체 변수의 주소를 가지고 있었던 구조체 포인터 변수를 NULL 로 초기화 */ 
 }
 
