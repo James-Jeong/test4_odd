@@ -19,7 +19,7 @@
 /** 함수 반환값 열거형 */
 enum ERROR{
 	UNKNOWN		= -1,	/** 알 수 없는 값 입력 */
-	EQUAL		= 0,	/** 일치 */
+	EQUAL		= 0,	/** 일치 (strncmp 함수에서 사용) */
 	FAIL		= 0,	/** 실패 */
 	SUCCESS,			/** 성공 */
 	EXIT,				/** 종료 */
@@ -107,7 +107,6 @@ int input_number( int *num){
 			}
 			else{
 				printf("\t| ! 정수 변환 실패, atoi 함수 오류\n");
-				perror("atoi");
 			}
 		}
 		else if( return_value == FAIL){ /** 문자열을 입력 받은 경우 */
@@ -156,9 +155,9 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 			else if( return_value == UNKNOWN) continue; /** 입력 종료 코드가 아닌 문자열 입력 시 재입력 진행 */
 			else if( return_value == SUCCESS){ /** 입력 성공 시 해당 정수 저장 */
 				odd->size++; /** 먼저 개수를 하나 증가시켜서 최대 입력 개수를 초과하는지 확인한다. */
-				if( odd->size >= MAX_INPUT){ /** 초과하면 입력 루틴 종료 */
+				if( odd->size >= MAX_INPUT){ /** 초과하면 입력 루틴 종료, odd->size 는 배열의 인덱스값이므로 MAX_INPUT 값과 같으면 안된다. */
 					printf("\t| ! 입력 실패, 최대 입력 개수 초과\n");
-					break; /** break 될 때, return_value 는 SUCCESS */
+					break; /** break 될 때, 입력값에 대한 오류는 없으므로 성공으로 간주. return_value 는 SUCCESS */
 				}
 				else{ /** 초과하지 않으면 입력 성공, odd 객체의 배열에 저장 */
 					odd->nums[odd->size] = number;
@@ -198,10 +197,11 @@ void test4_odd_print_odd_numbers( test4_odd_t *odd){
 		int is_odd = 0;		/** 입력 받은 정수 리스트에서 홀수 개수를 카운트하는 변수 */
 
 		printf("\n");
-		printf("\t| @ 총 입력 개수 : %d\n\n", odd->size + 1);
+		printf("\t| @ 총 입력 개수\t: %d\n", odd->size + 1); /** odd->size 는 현재 배열의 마지막 인덱스값이므로 개수를 구하기 위해서 1 을 더해준다. */
+		printf("\t| @ (순서)\t\t: (입력한 정수)\n");
 		for( ; loop_index <= odd->size; loop_index++){
-			if( abs( odd->nums[loop_index]) % 2 == 1){ /** 홀수만 선택 */
-				printf("\t| @ %d : %d\n", ( loop_index + 1), odd->nums[loop_index]);
+			if( abs( odd->nums[loop_index]) % 2 == 1){ /** 홀수만 선택. 음수 계산을 위해 절대값 사용 */
+				printf("\t| @ %d\t\t\t: %d\n", ( loop_index + 1), odd->nums[loop_index]);
 				is_odd++;
 			}
 		}
