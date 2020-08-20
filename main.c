@@ -14,6 +14,7 @@
 #define MAX_INPUT	10
 /** 최소 숫자 입력 개수 */
 #define MIN_INPUT	5
+
 /** 함수 반환값 열거형 */
 enum ERROR{
 	UNKNOWN		= -1,	/** 알 수 없는 값 입력 */
@@ -48,7 +49,7 @@ struct test4_odd_s{
  * @return 문자열이 정수인지 검사 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 int check_digit( char *buf){
-	int return_value = SUCCESS;			/** 검사 성공 여부를 설정할 변수 */
+	int return_value = SUCCESS;	/** 검사 성공 여부를 설정할 변수 */
 
 	if( buf == NULL){ /** 매개변수로 전달 받은 문자열 변수가 NULL 인 경우, return_value 에 FAIL 을 설정한다. */
 		printf("\t| ! 버퍼 NULL 오류 발생\n");
@@ -107,8 +108,8 @@ int input_number( int *num){
 				return_value = UNKNOWN;
 			}
 		}
-		else{
-
+		else{ /** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
+			printf("\t| ! check_digit 함수에서 알 수 없는 반환값 발생\n");
 		}
 	}
 
@@ -152,7 +153,7 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 					//printf("\t| @ 입력 성공 : %d\n", odd->nums[odd->size]);
 				}
 			}
-			else{ /** return_value 가 설정된 열거형 값이 아닌 경우 */
+			else{ /** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 				printf("\t| ! input_number 함수에서 알 수 없는 반환값 발생\n");
 			}
 			/** 입력 사이클 종료 */
@@ -229,7 +230,7 @@ int main(){
 		else if(( return_value == SUCCESS) || ( return_value == EXIT)){ /** return_value 가 EXIT 또는 SUCCESS 인 경우, 출력 진행 */
 			test4_odd_print_odd_numbers( odd);
 		}
-		else{ /** return_value 가 설정된 열거형 값이 아닌 경우 */
+		else{ /** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 			printf("\t| ! test4_odd_input_numbers 함수에서 알 수 없는 반환값 발생\n");
 		}
 		break; /** 입력 종료 */
