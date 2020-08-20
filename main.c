@@ -3,9 +3,8 @@
 //////////////////////////////////////
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <stdint.h>
+#include <ctype.h>
 #include <math.h>
 
 
@@ -91,7 +90,7 @@ int input_number( int *num){
 	printf("\t| @ 입력 : ");
 	if( fgets( buf, MAX_NUMS, stdin) == NULL){ /** 어떠한 입력도 받지 못하거나 오류가 발생하면 NULL 을 반환한다. */
 		printf("\t| ! 입력 실패, fgets 함수 오류\n");
-		perror("fgets");
+		perror("\t| ! fgets");
 	}
 	else{
 		/** 입력 후 정수 또는 문자열인지 검사 */
@@ -225,7 +224,7 @@ int main(){
 	test4_odd_t *odd = ( test4_odd_t*)malloc(sizeof( test4_odd_t)); /** 정수를 입력 받을 구조체를 할당해서 그 주소를 가지고 있는 구조체 포인터 변수 */
 	if( odd == NULL){
 		printf("\t| ! 객체 메모리 할당 실패, 프로그램 종료\n");
-		perror("malloc");
+		perror("\t| ! malloc");
 		return FAIL;
 	}
 
