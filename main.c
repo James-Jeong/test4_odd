@@ -52,7 +52,7 @@ int check_digit( char *buf){
 	size_t buf_size = strlen( buf);		/** 전달 받은 문자열의 길이 변수 */
 	int return_value = SUCCESS;			/** 검사 성공 여부를 설정할 변수 */
 
-	if( buf[0] == '\n'){ /** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. */
+	if( buf[0] == '\n'){ /** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. 재입력 진행. */
 		return_value = FAIL;
 	}
 	else{
@@ -90,12 +90,12 @@ int input_number( int *num){
 		if( return_value == SUCCESS){ /** 숫자를 입력 받은 경우 */
 			*num = atoi( buf);
 		}
-		else{ /** 입력 종료 코드(문자열)를 입력 받은 경우 */
-			if( strncmp( buf, exit_code, MAX_NUMS) == EQUAL){
+		else{ /** 문자열을 입력 받은 경우 */
+			if( strncmp( buf, exit_code, MAX_NUMS) == EQUAL){ /** 입력 종료 코드(문자열)를 입력 받은 경우 */
 				printf("\t| @ 입력 종료\n");
 				return_value = EXIT;
 			}
-			else{ /** 입력 종료 코드(문자열)가 아닌 문자열을 입력 받은 경우 */
+			else{ /** 입력 종료 코드(문자열)가 아닌 알 수 없는 문자열을 입력 받은 경우 */
 				printf("\t| ! 입력 실패, 알 수 없는 입력\n");
 				return_value = UNKNOWN;
 			}
@@ -125,12 +125,13 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 
 		odd->size = -1;
 		int number = 0; /** 임시 입력 변수 */
+
 		while( 1){
 			/** 입력 사이클 시작 */
 			return_value = input_number( &number);
 			if(( return_value == FAIL) || ( return_value == EXIT)) break; /** 입력 실패이거나 종료 코드를 입력 받으면, 입력 루틴 종료 */
 			else if( return_value == UNKNOWN) continue; /** 입력 종료 코드가 아닌 문자열 입력 시 재입력 진행 */
-			else{ /** 입력 성공 시 해당 정수 저장 */
+			else if( return_value == SUCCESS){ /** 입력 성공 시 해당 정수 저장 */
 				odd->size++; /** 먼저 개수를 하나 증가시켜서 최대 입력 개수를 초과하는지 확인한다. */
 				if( odd->size >= MAX_INPUT){ /** 초과하면 입력 루틴 종료 */
 					printf("\t| ! 입력 실패, 최대 입력 개수 초과\n");
@@ -140,6 +141,9 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 					odd->nums[odd->size] = number;
 					//printf("\t| @ 입력 성공 : %d\n", odd->nums[odd->size]);
 				}
+			}
+			else{ /** return_value 가 설정된 열거형 값이 아닌 경우 */
+				printf("\t| ! input_number 함수에서 알 수 없는 반환값 발생\n");
 			}
 			/** 입력 사이클 종료 */
 		}
@@ -168,7 +172,7 @@ void test4_odd_print_odd_numbers( test4_odd_t *odd){
 	}
 	else{
 		int loop_index = 0;	/** 반복문 인덱스 변수 */
-		int is_odd = 0;		/** 홀수 카운트 변수 */
+		int is_odd = 0;		/** 입력 받은 정수 리스트에서 홀수 개수를 카운트하는 변수 */
 
 		printf("\n");
 		printf("\t| @ 총 입력 개수 : %d\n\n", odd->size);
@@ -213,10 +217,13 @@ int main(){
 			memset( odd, 0, sizeof( test4_odd_t));
 			continue;
 		}
-		else{ /** return_value 가 EXIT 또는 SUCCESS 인 경우, 출력 진행 */
+		else if(( return_value == SUCCESS) || ( return_value == EXIT)){ /** return_value 가 EXIT 또는 SUCCESS 인 경우, 출력 진행 */
 			test4_odd_print_odd_numbers( odd);
 		}
-		break;
+		else{ /** return_value 가 설정된 열거형 값이 아닌 경우 */
+			printf("\t| ! test4_odd_input_numbers 함수에서 알 수 없는 반환값 발생\n");
+		}
+		break; /** 입력 종료 */
 	}
 
 	free( odd); /** 할당된 구조체 변수의 메모리를 해제 */
