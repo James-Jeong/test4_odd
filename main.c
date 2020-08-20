@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <ctype.h>
 #include <math.h>
 
@@ -11,9 +12,9 @@
 /** 최대 입력 자리수 */
 #define MAX_NUMS	10
 /** 최대 숫자 입력 개수 */
-#define MAX_INPUT	10
+#define MAX_NINPUT	10
 /** 최소 숫자 입력 개수 */
-#define MIN_INPUT	5
+#define MIN_NINPUT	5
 
 /** 함수 반환값 열거형 */
 enum STATUS{
@@ -63,7 +64,7 @@ int check_buffer( const char *buf){
 	size_t buf_size = strlen( buf);		/** 전달 받은 문자열의 길이 변수 */
 
 	if( buf[0] == '\n'){ /** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. 재입력 진행. */
-		return FAIL;
+		return AGAIN;
 	}
 
 	for( ; loop_index < buf_size; loop_index++){
@@ -95,10 +96,34 @@ int check_buffer( const char *buf){
 }
 
 /**
+ * @fn int convert_buffer_to_integer( char *buf)
+ * @brief 매개변수로 전달 받은 문자열을 정수로 바꾸는 함수
+ * @param buf 정수로 바꿀 문자열 변수 (char* 변수)
+ * @return 성공 시 변환된 정수, 실패 시 FAIL 반환
+ */
+int convert_buffer_to_integer( const char *buf){
+	int return_value = FAIL;
+	int number = atoi( buf);
+	if( number != 0){
+		return_value = number;
+	}
+	else{
+		/** 문자열이어서 atoi 반환값이 0 인 경우 */
+		if( isdigit( buf[0]) == 0){
+			printf("\t| ! 정수 변환 실패, atoi 함수 오류\n");
+			return_value = FAIL;
+		}
+		/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
+		else return_value = number;
+	}
+	return return_value;
+}
+
+/**
  * @fn int input_number( int *num)
- * @brief 숫자 하나를 입력받는 함수, fgets 함수를 통해 최대 10 자리수까지 입력받는다.
- * @param num 입력 받을 정수 변수의 주소를 가리키는 포인터 변수
- * @return 입력 성공 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 알 수 없는 입력 시 UNKNOWN, 프로그램 종료 시 FINISH 반환
+ * @brief 숫자 하나를 입력받는 함수
+ * @param num 입력 받을 정수 변수의 주소를 가리키는 포인터
+ * @return 입력 성공 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 개행 문자 입력 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 프로그램 종료 시 FINISH 반환
  */
 int input_number( int *num){
 	int return_value = FAIL;	/** 입력 성공 여부를 설정할 변수 */
@@ -112,20 +137,14 @@ int input_number( int *num){
 	}
 	/** 입력 후 정수 또는 문자열인지 검사 */
 	/** 정수면 저장, 문자열이면 종료 코드인지 확인 */
+	//TODO
+//	while( getchar() != '\n');
 
-	int number = UNKNOWN; /** atoi 함수가 정상적으로 정수를 변환하는지 검사하는 변수. 변환에 실패하면 0, 성공하면 입력 받은 정수(int형)를 반환 */
 	return_value = check_buffer( buf);
 	switch( return_value){
-		case SUCCESS: /** 숫자를 입력 받은 경우 */
-			//TODO
-			number = atoi( buf);
-			if( number != 0){
-				*num = number;
-			}
-			else{
-				printf("\t| ! 정수 변환 실패, atoi 함수 오류\n");
-				return_value = UNKNOWN;
-			}
+		case SUCCESS:/** 숫자를 입력 받은 경우 */
+			*num = convert_buffer_to_integer( buf);
+			if( *num >= INT_MAX) *num = FAIL;
 			break;
 		case FAIL: /** 문자열을 입력 받은 경우 */
 			//TODO
@@ -138,13 +157,14 @@ int input_number( int *num){
 			}
 			else{ /** 입력 종료 코드(문자열)가 아닌 알 수 없는 문자열을 입력 받은 경우 */
 				printf("\t| ! 입력 실패, 알 수 없는 입력\n");
-				while( getchar() != '\n');
 				return_value = UNKNOWN;
 			}
 			break;
+		case AGAIN:
+			break;
 		default: /** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 			printf("\t| ! [DEBUG] check_buffer 함수에서 알 수 없는 반환값 발생\n");
-			break;
+		   break;
 	}
 
 	return return_value;
@@ -153,7 +173,7 @@ int input_number( int *num){
 /**
  * @fn void input_numbers( input_data_t *odd)
  * @brief 지정된 입력 개수 범위 내에서 정수들을 입력 받는 함수
- * @param odd 입력된 정수들을 저장하고 관리하기 위한 input_data_t 구조체를 가리키는 포인터
+ * @param odd 입력된 정수들을 저장하고 관리하기 위한 input_data_t 구조체 포인터
  * @return 성공 시 SUCCESS, 실패 시 FAIL, 프로그램 재시작 시 AGAIN, 입력 종료 시 EXIT, 프로그램 종료 시 FINISH 반환
  */
 int input_numbers( input_data_t *odd){
@@ -165,27 +185,37 @@ int input_numbers( input_data_t *odd){
 		return FAIL;
 	}
 
-	printf("\n\t| @ 프로그램 시작\n");
-	printf("\t| @ 최소 입력 개수 : %d\n", MIN_INPUT);
-	printf("\t| @ 최대 입력 개수 : %d\n", MAX_INPUT);
-	printf("\t| @ 숫자 최대 입력 자리수 : %d\n\n", MAX_NUMS);
+	printf("\n\t| --------------------------------------------\n");
+	printf("\t| @ 홀수 출력 프로그램\n");
+	printf("\t| @ (정수만 입력 가능)\n");
+	printf("\t| @ 최소 입력 개수 : %d\n", MIN_NINPUT);
+	printf("\t| @ 최대 입력 개수 : %d\n", MAX_NINPUT);
+	printf("\t| @ 숫자 최대 입력 자리수 : %d\n", MAX_NUMS);
+	printf("\t| @ 입력 종료 : q \n");
+	printf("\t| @ 프로그램 종료 : end \n\n");
 
 	odd->size = UNKNOWN;
 	int number = 0; /** 임시 입력 변수 */
+	int is_loop_break = 0; /** 무한 루프 탈출 확인 변수 */
 
 	while( 1){
 		/** 입력 사이클 시작 */
-		odd->size++; /** 먼저 개수를 하나 증가시켜서 최대 입력 개수를 초과하는지 확인한다. */
-		if( odd->size >= MAX_INPUT){ /** 초과하면 입력 루틴 종료, odd->size 는 배열의 인덱스값이므로 MAX_INPUT 값과 같으면 안된다. */
-			break;
+		if( return_value_num != AGAIN){
+			odd->size++; /** 먼저 개수를 하나 증가시켜서 최대 입력 개수를 초과하는지 확인한다. */
+			if( odd->size >= MAX_NINPUT){ /** 초과하면 입력 루틴 종료, odd->size 는 배열의 인덱스값이므로 MAX_NINPUT 값과 같으면 안된다. */
+				break;
+			}
 		}
 
 		return_value_num = input_number( &number);
-		/** 아래 3 가지 경우일 때 입력 루틴을 종료한다. */
 		switch( return_value_num){
+			/** 아래 3 가지 경우일 때 입력 루틴을 종료한다. */
 			case FAIL:		/** 입력 실패 */
 			case EXIT:		/** 입력 종료 코드 입력 */
 			case FINISH:	/** 프로그램 종료 코드 입력 */
+				is_loop_break++;
+				break;
+			case AGAIN:
 				break;
 			case UNKNOWN:	/** 입력 종료 코드가 아닌 문자열 입력 시 재입력 진행 */
 				continue;
@@ -194,13 +224,15 @@ int input_numbers( input_data_t *odd){
 				break;
 			default:		/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 				printf("\t| ! [DEBUG] input_number 함수에서 알 수 없는 반환값 발생\n");
+				is_loop_break++;
 				break;
 		}
+		if( is_loop_break > 0) break;
 		/** 입력 사이클 종료 */
 	}
 
 	/** 입력 루틴이 종료되면, 입력된 정수의 개수가 최소 입력 개수 미만인지 검사한다. return value 가 SUCCESS 이거나 EXIT 일 때 실행된다. */
-	if((( return_value_num == SUCCESS) || ( return_value_num == EXIT)) && ( odd->size < MIN_INPUT)){ /** 미만이면 총 몇개를 입력했는지 출력하고, 입력 루틴 실패 반환 */
+	if((( return_value_num == SUCCESS) || ( return_value_num == EXIT)) && ( odd->size < MIN_NINPUT)){ /** 미만이면 총 몇개를 입력했는지 출력하고, 입력 루틴 실패 반환 */
 		printf("\t| ! 입력 실패, 최소 입력 개수 미만 / 입력 개수 : %d\n", odd->size + 1);
 		return_value_nums = AGAIN;
 	}
@@ -235,7 +267,7 @@ void print_odd_numbers( input_data_t *odd){
 		}
 	}
 	if( is_odd > 0)	printf("\n\t| @ 출력 성공\n\n");	/** 홀수 카운트가 0 보다 클 경우, 홀수 출력 성공 */
-	else printf("\n\t| ! 출력 실패\n\n");				/** 홀수 카운트가 0 보다 작거나 같을 경우, 홀수 출력 실패 */
+	else printf("\n\t| ! 짝수만 존재\n\n");				/** 홀수 카운트가 0 보다 작거나 같을 경우, 홀수 출력 실패 */
 }
 
 //////////////////////////////////////
