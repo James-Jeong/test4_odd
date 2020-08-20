@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 
 /** 최대 입력 자리수 */
@@ -64,7 +65,8 @@ int check_digit( char *buf){
 		}
 		else{
 			for( ; loop_index < buf_size; loop_index++){
-				if( buf[loop_index] == '\n') break;
+				if( buf[loop_index] == '\n') break; /** 해당 문자가 개행 문자일 경우, 해당 문자열의 끝이므로 반복문 종료 (by fgets function) */
+				if( buf[loop_index] == '-') continue; /** 해당 문자가 '-'일 경우, 음수를 뜻하므로 계속 진행 */
 				if( isdigit( buf[loop_index]) == 0) { /** 해당 문자가 정수가 아닌 경우, isdigit 함수가 0 을 반환 */
 					return_value = FAIL;
 					break;
@@ -94,9 +96,19 @@ int input_number( int *num){
 	else{
 		/** 입력 후 정수 또는 문자열인지 검사 */
 		/** 정수면 저장, 문자열이면 종료 코드인지 확인 */
+
+		int number = UNKNOWN; /** atoi 함수가 정상적으로 정수를 변환하는지 검사하는 변수. 변환에 실패하면 0, 성공하면 입력 받은 정수(int형)를 반환 */
 		return_value = check_digit( buf);
 		if( return_value == SUCCESS){ /** 숫자를 입력 받은 경우 */
-			*num = atoi( buf);
+			number = atoi( buf);
+			if( number != 0){
+				*num = number;
+				return_value = SUCCESS;
+			}
+			else{
+				printf("\t| ! 정수 변환 실패, atoi 함수 오류\n");
+				perror("atoi");
+			}
 		}
 		else if( return_value == FAIL){ /** 문자열을 입력 받은 경우 */
 			if( strncmp( buf, exit_code, MAX_NUMS) == EQUAL){ /** 입력 종료 코드(문자열)를 입력 받은 경우 */
@@ -134,7 +146,7 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 		printf("\t| @ 최소 입력 개수 : %d\n", MIN_INPUT);
 		printf("\t| @ 최대 입력 개수 : %d\n\n", MAX_INPUT);
 
-		odd->size = -1;
+		odd->size = UNKNOWN;
 		int number = 0; /** 임시 입력 변수 */
 
 		while( 1){
@@ -186,9 +198,9 @@ void test4_odd_print_odd_numbers( test4_odd_t *odd){
 		int is_odd = 0;		/** 입력 받은 정수 리스트에서 홀수 개수를 카운트하는 변수 */
 
 		printf("\n");
-		printf("\t| @ 총 입력 개수 : %d\n\n", odd->size);
-		for( ; loop_index < odd->size; loop_index++){
-			if( odd->nums[loop_index] % 2 == 1){ /** 홀수만 선택 */
+		printf("\t| @ 총 입력 개수 : %d\n\n", odd->size + 1);
+		for( ; loop_index <= odd->size; loop_index++){
+			if( abs( odd->nums[loop_index]) % 2 == 1){ /** 홀수만 선택 */
 				printf("\t| @ %d : %d\n", ( loop_index + 1), odd->nums[loop_index]);
 				is_odd++;
 			}
