@@ -48,19 +48,26 @@ struct test4_odd_s{
  * @return 문자열이 정수인지 검사 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 int check_digit( char *buf){
-	size_t loop_index = 0;				/** 반복문 인덱스 변수 */
-	size_t buf_size = strlen( buf);		/** 전달 받은 문자열의 길이 변수 */
 	int return_value = SUCCESS;			/** 검사 성공 여부를 설정할 변수 */
 
-	if( buf[0] == '\n'){ /** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. 재입력 진행. */
+	if( buf == NULL){ /** 매개변수로 전달 받은 문자열 변수가 NULL 인 경우, return_value 에 FAIL 을 설정한다. */
+		printf("\t| ! 버퍼 NULL 오류 발생\n");
 		return_value = FAIL;
 	}
 	else{
-		for( ; loop_index < buf_size; loop_index++){
-			if( buf[loop_index] == '\n') break;
-			if( isdigit( buf[loop_index]) == 0) { /** 해당 문자가 정수가 아닌 경우, isdigit 함수가 0 을 반환 */
-				return_value = FAIL;
-				break;
+		size_t loop_index = 0;				/** 반복문 인덱스 변수 */
+		size_t buf_size = strlen( buf);		/** 전달 받은 문자열의 길이 변수 */
+
+		if( buf[0] == '\n'){ /** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. 재입력 진행. */
+			return_value = FAIL;
+		}
+		else{
+			for( ; loop_index < buf_size; loop_index++){
+				if( buf[loop_index] == '\n') break;
+				if( isdigit( buf[loop_index]) == 0) { /** 해당 문자가 정수가 아닌 경우, isdigit 함수가 0 을 반환 */
+					return_value = FAIL;
+					break;
+				}
 			}
 		}
 	}
@@ -90,7 +97,7 @@ int input_number( int *num){
 		if( return_value == SUCCESS){ /** 숫자를 입력 받은 경우 */
 			*num = atoi( buf);
 		}
-		else{ /** 문자열을 입력 받은 경우 */
+		else if( return_value == FAIL){ /** 문자열을 입력 받은 경우 */
 			if( strncmp( buf, exit_code, MAX_NUMS) == EQUAL){ /** 입력 종료 코드(문자열)를 입력 받은 경우 */
 				printf("\t| @ 입력 종료\n");
 				return_value = EXIT;
@@ -99,6 +106,9 @@ int input_number( int *num){
 				printf("\t| ! 입력 실패, 알 수 없는 입력\n");
 				return_value = UNKNOWN;
 			}
+		}
+		else{
+
 		}
 	}
 
@@ -210,7 +220,6 @@ int main(){
 		return_value = test4_odd_input_numbers( odd); /** 입력 진행 */
 		if( return_value == FAIL){
 			printf("\t| ! 입력 실패, 프로그램 종료\n");
-			return_value = FAIL;
 		}
 		else if( return_value == AGAIN){ /** return_value 가 AGAIN 인 경우, 입력 재진행. 보통 최소 입력 개수 미달로 인한 경우이다. 기존에 입력 받은 내용을 삭제한다. */
 			printf("\t| ! 입력 재진행, 기존에 입력 받은 정수 모두 초기화\n");
