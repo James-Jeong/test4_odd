@@ -106,6 +106,7 @@ int input_number( int *num){
 			}
 			else{
 				printf("\t| ! 정수 변환 실패, atoi 함수 오류\n");
+				return_value = UNKNOWN;
 			}
 		}
 		else if( return_value == FAIL){ /** 문자열을 입력 받은 경우 */
@@ -171,7 +172,7 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 
 		/** 입력 루틴이 종료되면, 입력된 정수의 개수가 최소 입력 개수 미만인지 검사한다. return value 가 SUCCESS 이거나 EXIT 일 때 실행된다. */
 		if((( return_value == SUCCESS) || ( return_value == EXIT)) && ( odd->size < MIN_INPUT)){ /** 미만이면 총 몇개를 입력했는지 출력하고, 입력 루틴 실패 반환 */
-			printf("\t| ! 입력 실패, 최소 입력 개수 미만 / 입력 개수 : %d\n", odd->size);
+			printf("\t| ! 입력 실패, 최소 입력 개수 미만 / 입력 개수 : %d\n", odd->size + 1);
 			return_value = AGAIN;
 		}
 		/** 이상이면 입력 루틴 성공 반환 */
