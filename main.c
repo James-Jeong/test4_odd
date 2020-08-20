@@ -137,7 +137,7 @@ int test4_odd_input_numbers( test4_odd_t *odd){
 	int return_value = SUCCESS; /** 입력 성공 여부를 설정할 변수 */
 
 	if( odd == NULL){ /** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
-		printf("\t| ! 입력 실패, 알 수 없는 객체 (NULL)\n");
+		printf("\t| ! 입력 실패, 알 수 없는 객체 포인터 (NULL)\n");
 		return_value = FAIL;
 	}
 	else{
@@ -189,7 +189,7 @@ int test4_odd_input_numbers( test4_odd_t *odd){
  */
 void test4_odd_print_odd_numbers( test4_odd_t *odd){
 	if( odd == NULL){ /** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
-		printf("\t| ! 출력 실패, 알 수 없는 객체 (NULL)\n");
+		printf("\t| ! 출력 실패, 알 수 없는 객체 포인터 (NULL)\n");
 		return ;
 	}
 	else{
