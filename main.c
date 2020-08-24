@@ -19,7 +19,7 @@
 enum STATUS
 {
 	UNKNOWN = -1,	/** 알 수 없는 값 입력 */
-	EQUAL = 0,		/** 일치 (strncmp 함수에서 사용) */
+	EQUAL = 0,		/** 일치 (비교 함수에서 사용) */
 	FAIL = 0,		/** 실패 */
 	SUCCESS,		/** 성공 */
 	EXIT,			/** 입력 종료 */
@@ -31,9 +31,9 @@ enum STATUS
 
 /** 입력 중단 코드 문자열 */
 const char *exit_code = "q";
-/** 입력 초기화 문자열 */
+/** 입력 초기화 코드 문자열 */
 const char *clear_code = "cls";
-/** 입력 조회 문자열 */
+/** 입력 조회 코드 문자열 */
 const char *display_code = "dis";
 /** 프로그램 종료 코드 문자열 */
 const char *finish_code = "end";
@@ -72,7 +72,7 @@ void clear_numbers(input_data_t *data)
 {
 	data->size = 0;
 	data->nums[0] = '\0';
-	printf("\t| @ 데이터 초기화 완료.\n");
+	printf("\t| @ 초기화 완료.\n");
 }
 
 /**
@@ -89,7 +89,7 @@ int check_buffer(char *buf)
 	/** 매개변수로 전달 받은 문자열 변수가 NULL 인 경우, return_value 에 FAIL 을 설정한다. */
 	if (buf == NULL)
 	{
-		printf("\t| ! [DEBUG] 버퍼 NULL 오류 발생.\n");
+		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
 		return FAIL;
 	}
 
@@ -114,7 +114,10 @@ int check_buffer(char *buf)
 			/** 2) '-' 문자가 개행 문자 바로 전에 있는 경우 (숫자 뒤에 있는 경우) */
 			/** 3) '-' 문자가 두 번 이상 카운트되는 경우 */
 			/** 4) '-' 문자와 숫자 사이에 다른 문자가 있는 경우 (공백 포함) */
-			if (((loop_index > 0) && (isdigit(buf[loop_index + 1])) != 0) || (buf[loop_index + 1] == '\n') || (minus_count > 1) || ((loop_index > 0) && (isspace(buf[loop_index + 1])) != 0))
+			if (((loop_index > 0) && (isdigit(buf[loop_index + 1])) != 0) || 
+				(buf[loop_index + 1] == '\n') || 
+				(minus_count > 1) || 
+				((loop_index > 0) && (isspace(buf[loop_index + 1])) != 0))
 			{
 				return_value = FAIL;
 				break;
@@ -300,7 +303,9 @@ int input_number(int *num)
 	case SUCCESS:
 		*num = convert_buffer_to_integer(buf);
 		if (*num >= INT_MAX)
+		{
 			*num = FAIL;
+		}
 		break;
 	/** 문자열을 입력 받은 경우 */
 	case FAIL:
@@ -327,6 +332,8 @@ int input_numbers(input_data_t *data)
 	int return_value_nums = SUCCESS;
 	/** input_number 반환값 변수 */
 	int return_value_num = SUCCESS;
+	/** 입력 재진행 여부 변수 */
+	int is_input_again = FAIL;
 
 	/** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
 	if (data == NULL)
@@ -348,15 +355,13 @@ int input_numbers(input_data_t *data)
 
 	clear_numbers(data);
 
-	/** 임시 입력 변수 */
-	int number = UNKNOWN;
-	/** 무한 루프 탈출 확인 변수 */
-	int is_loop_break = FAIL;
-	/** 입력 재진행 여부 변수 */
-	int is_input_again = FAIL;
-
 	while (1)
 	{
+		/** 임시 입력 변수 */
+		int number = UNKNOWN;
+		/** 무한 루프 탈출 확인 변수 */
+		int is_loop_break = FAIL;
+
 		/** 입력 사이클 시작 */
 		if ((is_input_again == FAIL) && (data->size >= MAX_NINPUT))
 		{
@@ -410,6 +415,7 @@ int input_numbers(input_data_t *data)
 			is_loop_break = SUCCESS;
 			break;
 		}
+
 		if (is_loop_break == SUCCESS)
 		{
 			break;
