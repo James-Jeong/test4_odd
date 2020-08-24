@@ -269,7 +269,7 @@ int convert_buffer_to_integer(const char *buf)
 /**
  * @fn int input_number( int *num)
  * @brief 숫자 하나를 입력받는 함수
- * @param num 입력 받을 정수 변수의 주소를 가리키는 포인터
+ * @param num 입력 받을 정수의 주소를 가리키는 포인터
  * @return 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 
  * 최대 입력 개수 초과 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 
  * 입력 데이터 초기화 시 CLEAR, 입력 데이터 조회 시 DISPLAY, 프로그램 종료 시 FINISH 반환
