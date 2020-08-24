@@ -45,7 +45,6 @@ const char *finish_code = "end";
 typedef struct input_data_s input_data_t;
 struct input_data_s
 {
-	int flag;
 	int size;			/**< 입력 받은 정수들의 개수 */
 	int nums[MAX_NUMS]; /**< 입력 받은 정수 리스트 */
 };
