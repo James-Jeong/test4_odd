@@ -123,7 +123,7 @@ int check_buffer(const char *buf)
  * @fn int confirm_finish_again(const char *buf)
  * @brief 입력 또는 프로그램 종료를 사용자로부터 재확인하는 함수
  * @param code 종료의 유형을 출력할 문자열 변수
- * @return 종료가 확실하면 AGAIN, 아니면 FAIL, 입력 함수 내부 오류 시 UNKNOWN 반환
+ * @return 종료가 확실하면 AGAIN, 아니면 FAIL, 최대 입력 개수 초과 시 UNKNOWN 반환
  */
 int confirm_finish_again(const char *buf)
 {
@@ -234,7 +234,7 @@ int convert_buffer_to_integer(const char *buf)
  * @fn int input_number( int *num)
  * @brief 숫자 하나를 입력받는 함수
  * @param num 입력 받을 정수 변수의 주소를 가리키는 포인터
- * @return 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 최대 입력 개수 초과 또는 개행 문자 입력 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 프로그램 종료 시 FINISH 반환
+ * @return 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 최대 입력 개수 초과 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 프로그램 종료 시 FINISH 반환
  */
 int input_number(int *num)
 {
@@ -410,7 +410,7 @@ void print_current_numbers(input_data_t *data)
 	}
 
 	printf("\n\t| --------------------------------------------\n");
-	printf("\t| @ 총 입력 개수\t: %d\n", data->size);
+	printf("\t| @ 현재 입력 개수\t: %d\n", data->size);
 	printf("\t| @ (순서)\t\t: (입력한 정수)\n");
 	for (; loop_index < data->size; loop_index++)
 	{
