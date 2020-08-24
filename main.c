@@ -18,17 +18,23 @@
 /** 함수 반환값 열거형 */
 enum STATUS
 {
-	UNKNOWN = -1, /** 알 수 없는 값 입력 */
-	EQUAL = 0,	  /** 일치 (strncmp 함수에서 사용) */
-	FAIL = 0,	  /** 실패 */
-	SUCCESS,	  /** 성공 */
-	EXIT,		  /** 입력 종료 */
-	FINISH,		  /** 프로그램 종료 */
-	AGAIN		  /** 재진행 */
+	UNKNOWN = -1,	/** 알 수 없는 값 입력 */
+	EQUAL = 0,		/** 일치 (strncmp 함수에서 사용) */
+	FAIL = 0,		/** 실패 */
+	SUCCESS,		/** 성공 */
+	EXIT,			/** 입력 종료 */
+	FINISH,			/** 프로그램 종료 */
+	AGAIN,			/** 재진행 */
+	CLEAR,			/** 초기화 */
+	DISPLAY			/** 조회 */
 };
 
 /** 입력 중단 코드 문자열 */
 const char *exit_code = "q";
+/** 입력 초기화 문자열 */
+const char *clear_code = "cls";
+/** 입력 조회 문자열 */
+const char *display_code = "dis";
 /** 프로그램 종료 코드 문자열 */
 const char *finish_code = "end";
 
@@ -46,6 +52,7 @@ struct input_data_s
 //////////////////////////////////////
 // Local functions
 //////////////////////////////////////
+void clear_numbers(input_data_t *data);
 int check_buffer(char *buf);
 int confirm_finish_again(const char *buf);
 int check_command(const char *code);
@@ -54,32 +61,18 @@ int input_number(int *num);
 int input_numbers(input_data_t *data);
 void print_current_numbers(input_data_t *data);
 void print_odd_numbers(input_data_t *data);
-void remove_buffer_space(char *buf);
 
 /**
- * @fn int remove_buffer_space( char *buf)
- * @brief 매개변수로 전달 받은 문자열에서 모든 공백(탭, 스페이스)을 제거하는 함수
- * @param buf 공백을 제거할 문자열 변수 (char* 변수)
+ * @fn int check_buffer( char *buf)
+ * @brief 매개변수로 전달 받은 문자열이 정수인지 확인하는 함수
+ * @param data 데이터 초기화할 input_data_t 포인터 변수
  * @return 반환값 없음
  */
-void remove_buffer_space(char *buf)
+void clear_numbers(input_data_t *data)
 {
-	if (buf == NULL)
-	{
-		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
-		return ;
-	}
-
-	char *temp_buf = buf;
-	do
-	{
-		while(isspace(*temp_buf))
-		{
-			temp_buf++;
-		}
-		*buf++ = *temp_buf++;
-	}
-	while(*buf != '\0');
+	data->size = 0;
+	data->nums[0] = '\0';
+	printf("\t| @ 데이터 초기화 완료.\n");
 }
 
 /**
@@ -106,14 +99,6 @@ int check_buffer(char *buf)
 	size_t loop_index = 0;
 	/** 전달 받은 문자열의 길이 변수 */
 	size_t buf_size = strlen(buf);
-
-	/** 아무것도 입력하지 않고, 엔터만 입력 시 return_value 에 FAIL 을 설정한다. 재입력 진행. */
-	if (buf[0] == '\n')
-	{
-		return AGAIN;
-	}
-
-	remove_buffer_space(buf);
 
 	for (; loop_index < buf_size; loop_index++)
 	{
@@ -166,7 +151,7 @@ int confirm_finish_again(const char *buf)
 	{
 		while( getchar() != '\n');
 		char _buf[MAX_NUMS];
-		printf("\n\t| @ %s을 종료하시겠습니까?\n", buf);
+		printf("\n\t| @ %s하시겠습니까?\n", buf);
 		printf("\t| @ (입력된 데이터가 초기화됩니다.)\n");
 		printf("\t| @ (y/n) : ");
 		if (scanf_s("%[^\n]", _buf, sizeof(_buf)) <= 0)
@@ -183,11 +168,6 @@ int confirm_finish_again(const char *buf)
 			return_value = AGAIN;
 			break;
 		}
-		else if (_buf[0] == '\n')
-		{
-			memset(_buf, 0, sizeof(_buf));
-			continue;
-		}
 		else
 		{
 			printf("\t| ! 잘못된 입력입니다.\n");
@@ -199,9 +179,10 @@ int confirm_finish_again(const char *buf)
 
 /**
  * @fn int check_command( const char *code)
- * @brief 매개변수로 전달 받은 코드를 검사하는 함수
+ * @brief 매개변수로 전달 받은 문자열이 어떤 명령어 코드인지 검사하는 함수
+ * 종료 코드이면, 해당 명령을 실행하기 전에 사용자 오류를 방지하기 위해 재확인을 받는다.
  * @param code 검사할 문자열 변수
- * @return 지정된 code 가 존재할 때 해당 코드의 열거형, 알 수 없는 코드일 때 FAIL 반환
+ * @return 성공 시 해당 명령어의 열거형, 실패 시 FAIL 반환
  */
 int check_command(const char *code)
 {
@@ -215,16 +196,30 @@ int check_command(const char *code)
 	/** 입력 종료 코드(문자열)를 입력 받은 경우 */
 	if (strncmp(code, exit_code, MAX_NUMS) == EQUAL)
 	{
-		return_value = confirm_finish_again("입력");
+		return_value = confirm_finish_again("입력 종료");
 		if (return_value != AGAIN)
 		{
 			return_value = EXIT;
 		}
 	}
+	/** 입력 초기화 코드(문자열)를 입력 받은 경우 */
+	else if (strncmp(code, clear_code, MAX_NUMS) == EQUAL)
+	{
+		return_value = confirm_finish_again("입력 초기화");
+		if (return_value != AGAIN)
+		{
+			return_value = CLEAR;
+		}
+	}
+	/** 입력 조회 코드(문자열)를 입력 받은 경우 */
+	else if (strncmp(code, display_code, MAX_NUMS) == EQUAL)
+	{
+		return_value = DISPLAY;
+	}
 	/** 프로그램 종료 코드(문자열)를 입력 받은 경우 */
 	else if (strncmp(code, finish_code, MAX_NUMS) == EQUAL)
 	{
-		return_value = confirm_finish_again("프로그램");
+		return_value = confirm_finish_again("프로그램 종료");
 		if (return_value != AGAIN)
 		{
 			return_value = FINISH;
@@ -264,7 +259,9 @@ int convert_buffer_to_integer(const char *buf)
 	}
 	/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
 	else
+	{
 		return_value = number;
+	}
 
 	return return_value;
 }
@@ -273,7 +270,9 @@ int convert_buffer_to_integer(const char *buf)
  * @fn int input_number( int *num)
  * @brief 숫자 하나를 입력받는 함수
  * @param num 입력 받을 정수 변수의 주소를 가리키는 포인터
- * @return 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 최대 입력 개수 초과 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 프로그램 종료 시 FINISH 반환
+ * @return 성공 시 SUCCESS, 실패 시 FAIL, 입력 종료 시 EXIT, 
+ * 최대 입력 개수 초과 시 AGAIN, 알 수 없는 입력 시 UNKNOWN, 
+ * 입력 데이터 초기화 시 CLEAR, 입력 데이터 조회 시 DISPLAY, 프로그램 종료 시 FINISH 반환
  */
 int input_number(int *num)
 {
@@ -307,9 +306,6 @@ int input_number(int *num)
 	case FAIL:
 		return_value = check_command(buf);
 		break;
-	/** 엔터만 입력 시 재입력 */
-	case AGAIN:
-		break;
 	/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 	default:
 		printf("\t| ! [DEBUG] check_buffer 함수에서 알 수 없는 반환값 발생.\n");
@@ -342,13 +338,16 @@ int input_numbers(input_data_t *data)
 	printf("\n\t| --------------------------------------------\n");
 	printf("\t| @ 홀수 출력 프로그램\n");
 	printf("\t| @ (정수만 입력 가능)\n");
-	printf("\t| @ 최소 입력 개수 : %d\n", MIN_NINPUT);
-	printf("\t| @ 최대 입력 개수 : %d\n", MAX_NINPUT);
-	printf("\t| @ 숫자 최대 입력 자리수 : %d\n", MAX_NUMS);
-	printf("\t| @ 입력 종료 : q \n");
-	printf("\t| @ 프로그램 종료 : end \n\n");
+	printf("\t| @ 최소 입력 개수		: %d\n", MIN_NINPUT);
+	printf("\t| @ 최대 입력 개수		: %d\n", MAX_NINPUT);
+	printf("\t| @ 숫자 최대 입력 자리수	: %d\n", MAX_NUMS);
+	printf("\t| @ 입력 조회			: dis \n");
+	printf("\t| @ 입력 초기화			: cls \n");
+	printf("\t| @ 입력 종료			: q \n");
+	printf("\t| @ 프로그램 종료		: end \n\n");
 
-	data->size = UNKNOWN;
+	clear_numbers(data);
+
 	/** 임시 입력 변수 */
 	int number = UNKNOWN;
 	/** 무한 루프 탈출 확인 변수 */
@@ -359,15 +358,10 @@ int input_numbers(input_data_t *data)
 	while (1)
 	{
 		/** 입력 사이클 시작 */
-		if (is_input_again == FAIL)
+		if ((is_input_again == FAIL) && (data->size >= MAX_NINPUT))
 		{
-			/** 먼저 개수를 하나 증가시켜서 최대 입력 개수를 초과하는지 확인한다. */
-			data->size++;
 			/** 초과하면 입력 루틴 종료, data->size 는 배열의 인덱스값이므로 MAX_NINPUT 값과 같으면 안된다. */
-			if (data->size >= MAX_NINPUT)
-			{
-				break;
-			}
+			break;
 		}
 		/** 입력 사이클 재진행 */
 		else if (is_input_again == SUCCESS)
@@ -376,30 +370,39 @@ int input_numbers(input_data_t *data)
 			continue;
 		}
 
-		print_current_numbers(data);
-
 		return_value_num = input_number(&number);
 		switch (return_value_num)
 		{
-		/** 아래 3 가지 경우일 때 입력 루틴을 종료한다. */
-		/** 입력 실패 */
+		/** @ 아래 3 가지 경우일 때 입력 루틴을 종료한다. */
+			/** 1. 입력 실패 */
 		case FAIL:
-		/** 입력 종료 코드 입력 */
+			/** 2. 입력 종료 코드 입력 */
 		case EXIT:
-		/** 프로그램 종료 코드 입력 */
+			/** 3. 프로그램 종료 코드 입력 */
 		case FINISH:
 			is_loop_break = SUCCESS;
 			break;
-		/** 엔터만 입력 시 재입력 */
+		/** @ 아래 4 가지 경우일 때 입력 루틴을 재시작한다. */
+			/** 1. 입력한 데이터 조회 */
+		case DISPLAY:
+			print_current_numbers(data);
+			is_input_again = SUCCESS;
+			break;
+			/** 2. 입력한 데이터 초기화 */
+		case CLEAR:
+			clear_numbers(data);
+			is_input_again = SUCCESS;
+			break;
+			/** 3. 최대 입력 개수 초과 시 재입력 */
 		case AGAIN:
-		/** 입력 종료 코드가 아닌 문자열 입력 시 재입력 진행 */
+			/** 4. 입력 종료 코드가 아닌 문자열 입력 시 재입력 진행 */
 		case UNKNOWN:
-			data->size--;
 			is_input_again = SUCCESS;
 			break;
 		/** 입력 성공 시 해당 정수 저장 */
 		case SUCCESS:
 			data->nums[data->size] = number;
+			data->size++;
 			break;
 		/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 		default:
@@ -408,7 +411,9 @@ int input_numbers(input_data_t *data)
 			break;
 		}
 		if (is_loop_break == SUCCESS)
+		{
 			break;
+		}
 		/** 입력 사이클 종료 */
 	}
 
@@ -419,7 +424,9 @@ int input_numbers(input_data_t *data)
 		return_value_nums = AGAIN;
 	}
 	else
+	{
 		return_value_nums = return_value_num;
+	}
 	/** 이상이면 입력 루틴 성공 반환 */
 
 	return return_value_nums;
@@ -539,7 +546,6 @@ int main()
 			break;
 		case AGAIN:
 			printf("\t| ! 입력 재진행, 기존에 입력 받은 정수 모두 초기화.\n");
-			memset(data, 0, sizeof(input_data_t));
 			continue;
 		case SUCCESS:
 		case EXIT:
