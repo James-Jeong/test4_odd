@@ -102,9 +102,6 @@ int check_buffer(char *buf)
 
 	for (; loop_index < buf_size; loop_index++)
 	{
-		/** 해당 문자가 개행 문자일 경우, 해당 문자열의 끝이므로 반복문 종료 (by fgets function) */
-		if (buf[loop_index] == '\n')
-			break;
 		/** 해당 문자가 '-'일 경우, 음수를 뜻하므로 계속 진행 */
 		if (buf[loop_index] == '-')
 		{
