@@ -46,7 +46,7 @@ struct input_data_s
 //////////////////////////////////////
 // Local functions
 //////////////////////////////////////
-int check_buffer(const char *buf);
+int check_buffer(char *buf);
 int confirm_finish_again(const char *buf);
 int check_command(const char *code);
 int convert_buffer_to_integer(const char *buf);
@@ -54,14 +54,41 @@ int input_number(int *num);
 int input_numbers(input_data_t *data);
 void print_current_numbers(input_data_t *data);
 void print_odd_numbers(input_data_t *data);
+void remove_buffer_space(char *buf);
+
+/**
+ * @fn int remove_buffer_space( char *buf)
+ * @brief 매개변수로 전달 받은 문자열에서 모든 공백(탭, 스페이스)을 제거하는 함수
+ * @param buf 공백을 제거할 문자열 변수 (char* 변수)
+ * @return 반환값 없음
+ */
+void remove_buffer_space(char *buf)
+{
+	if (buf == NULL)
+	{
+		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+		return ;
+	}
+
+	char *temp_buf = buf;
+	do
+	{
+		while(isspace(*temp_buf))
+		{
+			temp_buf++;
+		}
+		*buf++ = *temp_buf++;
+	}
+	while(*buf != '\0');
+}
 
 /**
  * @fn int check_buffer( char *buf)
  * @brief 매개변수로 전달 받은 문자열이 정수인지 확인하는 함수
- * @param buf 정수인지 확인할 문자열 변수 (char* 변수)
+ * @param buf 정수인지 확인할 문자열 변수
  * @return 문자열이 정수인지 검사 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
-int check_buffer(const char *buf)
+int check_buffer(char *buf)
 {
 	/** 검사 성공 여부를 설정할 변수 */
 	int return_value = SUCCESS;
@@ -85,6 +112,8 @@ int check_buffer(const char *buf)
 	{
 		return AGAIN;
 	}
+
+	remove_buffer_space(buf);
 
 	for (; loop_index < buf_size; loop_index++)
 	{
@@ -127,18 +156,24 @@ int check_buffer(const char *buf)
 int confirm_finish_again(const char *buf)
 {
 	int return_value = FAIL;
+	if (buf == NULL)
+	{
+		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+		return return_value;
+	}
 
 	while (1)
 	{
+		while( getchar() != '\n');
 		char _buf[MAX_NUMS];
-		printf("\t| @ %s을 종료하시겠습니까?\n", buf);
+		printf("\n\t| @ %s을 종료하시겠습니까?\n", buf);
 		printf("\t| @ (입력된 데이터가 초기화됩니다.)\n");
 		printf("\t| @ (y/n) : ");
-		if (scanf_s(" %s", _buf, sizeof(_buf)) <= 0)
+		if (scanf_s("%[^\n]", _buf, sizeof(_buf)) <= 0)
 		{
 			return UNKNOWN;
 		}
-		
+
 		if (strncmp(_buf, "y", MAX_NUMS) == EQUAL)
 		{
 			break;
@@ -171,6 +206,11 @@ int confirm_finish_again(const char *buf)
 int check_command(const char *code)
 {
 	int return_value = FAIL;
+	if (code == NULL)
+	{
+		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+		return return_value;
+	}
 
 	/** 입력 종료 코드(문자열)를 입력 받은 경우 */
 	if (strncmp(code, exit_code, MAX_NUMS) == EQUAL)
@@ -203,7 +243,7 @@ int check_command(const char *code)
 /**
  * @fn int convert_buffer_to_integer( const char *buf)
  * @brief 매개변수로 전달 받은 문자열을 정수로 바꾸는 함수
- * @param buf 정수로 바꿀 문자열 변수 (const char* 변수)
+ * @param buf 정수로 바꿀 문자열 변수
  * @return 성공 시 변환된 정수, 실패 시 FAIL 반환
  */
 int convert_buffer_to_integer(const char *buf)
@@ -213,19 +253,19 @@ int convert_buffer_to_integer(const char *buf)
 	if (number != 0)
 	{
 		return_value = number;
+		return return_value;
 	}
-	else
+
+	/** 문자열이어서 atoi 반환값이 0 인 경우 */
+	if (isdigit(buf[0]) == 0)
 	{
-		/** 문자열이어서 atoi 반환값이 0 인 경우 */
-		if (isdigit(buf[0]) == 0)
-		{
-			printf("\t| ! 정수 변환 실패, atoi 함수 오류.\n");
-			return_value = FAIL;
-		}
-		/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
-		else
-			return_value = number;
+		printf("\t| ! 정수 변환 실패, atoi 함수 오류.\n");
+		return_value = FAIL;
 	}
+	/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
+	else
+		return_value = number;
+
 	return return_value;
 }
 
@@ -243,10 +283,10 @@ int input_number(int *num)
 	char buf[MAX_NUMS + 1];
 
 	printf("\n\t| @ 입력 : ");
-	if (scanf_s(" %s", buf, sizeof(buf)) <= 0)
+	if (scanf_s(" %[^\n]", buf, sizeof(buf)) <= 0)
 	{
 		/** 어떠한 입력도 받지 못하거나 오류가 발생하면 재입력을 위해 AGAIN 을 반환한다. */
-		while (getchar() != '\n')
+		while (getchar() != '\n');
 		memset(buf, 0, sizeof(buf));
 		printf("\t| ! 입력 재진행, 최대 입력 개수 초과.\n");
 		return AGAIN;
@@ -399,13 +439,13 @@ void print_current_numbers(input_data_t *data)
 		printf("\t| ! [DEBUG] 출력 실패, 알 수 없는 객체 포인터(NULL).\n");
 		return;
 	}
-	
+
 	/** 반복문 인덱스 변수 */
 	int loop_index = 0;
 
-	if(data->size <= 0)
+	if (data->size <= 0)
 	{
-		return ;
+		return;
 	}
 
 	printf("\n\t| --------------------------------------------\n");
@@ -449,12 +489,18 @@ void print_odd_numbers(input_data_t *data)
 			is_odd++;
 		}
 	}
+
 	/** 홀수 카운트가 0 보다 클 경우, 홀수 출력 성공 */
 	if (is_odd > 0)
+	{
 		printf("\n\t| @ 출력 성공.\n\n");
+	}
 	/** 홀수 카운트가 0 보다 작거나 같을 경우, 홀수 출력 실패 */
 	else
+	{
+		printf("\t| @ none\t\t: none\n");
 		printf("\n\t| ! 짝수만 존재.\n\n");
+	}
 }
 
 //////////////////////////////////////
