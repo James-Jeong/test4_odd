@@ -1,6 +1,3 @@
-//////////////////////////////////////
-// definition & macro
-//////////////////////////////////////
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +5,9 @@
 #include <ctype.h>
 #include <math.h>
 
+//////////////////////////////////////
+// Definitions & Macros
+//////////////////////////////////////
 /** 최대 입력 자리수 */
 #define MAX_NUMS 10
 /** 최대 숫자 입력 개수 */
@@ -44,7 +44,7 @@ struct input_data_s
 };
 
 //////////////////////////////////////
-// local function
+// Local functions
 //////////////////////////////////////
 int check_buffer(const char *buf);
 int confirm_finish_again(const char *buf);
@@ -54,7 +54,6 @@ int input_number(int *num);
 int input_numbers(input_data_t *data);
 void print_current_numbers(input_data_t *data);
 void print_odd_numbers(input_data_t *data);
-
 
 /**
  * @fn int check_buffer( char *buf)
@@ -459,12 +458,11 @@ void print_odd_numbers(input_data_t *data)
 }
 
 //////////////////////////////////////
-// main function
+// Main function
 //////////////////////////////////////
 /**
  * @fn int main()
  * @brief 정해진 숫자 개수 범위에 따라 입력 받은 정수들 중 홀수만 출력하는 프로그램
- * @param 매개변수 없음
  * @return 프로그램 실행 성공 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
 int main()
