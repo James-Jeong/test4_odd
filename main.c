@@ -106,11 +106,11 @@ int check_buffer(char *buf)
 		if (buf[loop_index] == '-')
 		{
 			minus_count++;
-			/** 아래의 경우에 해당되면 잘못된 정수이므로 return_value 에 FAIL 을 설정한다. */
+			/** 아래의 경우에 해당되면 잘못된 음의 정수이므로 return_value 에 FAIL 을 설정한다. */
 			/** 1) '-' 문자가 숫자 사이에 있는 경우 */
 			/** 2) '-' 문자가 개행 문자 바로 전에 있는 경우 (숫자 뒤에 있는 경우) */
 			/** 3) '-' 문자가 두 번 이상 카운트되는 경우 */
-			/** 4) '-' 문자와 숫자 사이에 다른 문자가 있는 경우 (공백 포함) */
+			/** 4) '-' 문자와 숫자 사이에 white space 문자가 있는 경우 */
 			if (((loop_index > 0) && (isdigit(buf[loop_index + 1])) != 0) || 
 				(buf[loop_index + 1] == '\n') || 
 				(minus_count > 1) || 
@@ -341,7 +341,7 @@ int input_numbers(input_data_t *data)
 
 	printf("\n\t| --------------------------------------------\n");
 	printf("\t| @ 홀수 출력 프로그램\n");
-	printf("\t| @ (정수만 입력 가능)\n");
+	printf("\t| @ (정수만 입력 가능 / 중복 허용 / 정렬X)\n");
 	printf("\t| @ 최소 입력 개수		: %d\n", MIN_NINPUT);
 	printf("\t| @ 최대 입력 개수		: %d\n", MAX_NINPUT);
 	printf("\t| @ 숫자 최대 입력 자리수	: %d\n", MAX_NUMS);
