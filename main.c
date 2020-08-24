@@ -52,8 +52,8 @@ struct input_data_s
 //////////////////////////////////////
 // Local functions
 //////////////////////////////////////
-void clear_numbers(input_data_t *data);
-int check_buffer(char *buf);
+void clear_input_numbers(input_data_t *data);
+int check_buffer_is_number(char *buf);
 int confirm_finish_again(const char *buf);
 int check_command(const char *code);
 int convert_buffer_to_integer(const char *buf);
@@ -63,12 +63,12 @@ void print_current_numbers(input_data_t *data);
 void print_odd_numbers(input_data_t *data);
 
 /**
- * @fn int check_buffer( char *buf)
+ * @fn int clear_input_numbers( char *buf)
  * @brief 매개변수로 전달 받은 문자열이 정수인지 확인하는 함수
  * @param data 데이터 초기화할 input_data_t 포인터 변수
  * @return 반환값 없음
  */
-void clear_numbers(input_data_t *data)
+void clear_input_numbers(input_data_t *data)
 {
 	data->size = 0;
 	data->nums[0] = '\0';
@@ -76,12 +76,12 @@ void clear_numbers(input_data_t *data)
 }
 
 /**
- * @fn int check_buffer( char *buf)
+ * @fn int check_buffer_is_number( char *buf)
  * @brief 매개변수로 전달 받은 문자열이 정수인지 확인하는 함수
  * @param buf 정수인지 확인할 문자열 변수
  * @return 문자열이 정수인지 검사 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
-int check_buffer(char *buf)
+int check_buffer_is_number(char *buf)
 {
 	/** 검사 성공 여부를 설정할 변수 */
 	int return_value = SUCCESS;
@@ -134,9 +134,9 @@ int check_buffer(char *buf)
 
 /**
  * @fn int confirm_finish_again(const char *buf)
- * @brief 입력 또는 프로그램 종료를 사용자로부터 재확인하는 함수
- * @param code 종료의 유형을 출력할 문자열 변수
- * @return 종료가 확실하면 AGAIN, 아니면 FAIL, 최대 입력 개수 초과 시 UNKNOWN 반환
+ * @brief 종료 또는 초기화 명령 수행 전에 사용자로부터 재확인하는 함수
+ * @param code 해당 명령어와 관련된 문자열을 출력할 문자열 변수
+ * @return 종료 또는 초기화가 확실하면 AGAIN, 아니면 FAIL
  */
 int confirm_finish_again(const char *buf)
 {
@@ -156,7 +156,8 @@ int confirm_finish_again(const char *buf)
 		printf("\t| @ (y/n) : ");
 		if (scanf_s("%[^\n]", _buf, sizeof(_buf)) <= 0)
 		{
-			return UNKNOWN;
+			printf("\t| ! 잘못된 입력입니다. 문자열 최대 입력 자리수 초과.\n");
+			continue;
 		}
 
 		if (strncmp(_buf, "y", MAX_NUMS) == EQUAL)
@@ -182,7 +183,7 @@ int confirm_finish_again(const char *buf)
  * @brief 매개변수로 전달 받은 문자열이 어떤 명령어 코드인지 검사하는 함수
  * 종료 코드이면, 해당 명령을 실행하기 전에 사용자 오류를 방지하기 위해 재확인을 받는다.
  * @param code 검사할 문자열 변수
- * @return 성공 시 해당 명령어의 열거형, 실패 시 FAIL 반환
+ * @return 성공 시 해당 명령어의 열거형, 문자열 참조 실패 시 FAIL, 알 수 없는 문자열을 입력받으면 UNKNOWN 을 반환
  */
 int check_command(const char *code)
 {
@@ -239,7 +240,7 @@ int check_command(const char *code)
  * @fn int convert_buffer_to_integer( const char *buf)
  * @brief 매개변수로 전달 받은 문자열을 정수로 바꾸는 함수
  * @param buf 정수로 바꿀 문자열 변수
- * @return 성공 시 변환된 정수, 실패 시 FAIL 반환
+ * @return 성공 시 변환된 정수, 정수 변환 실패 시 FAIL 반환
  */
 int convert_buffer_to_integer(const char *buf)
 {
@@ -293,7 +294,7 @@ int input_number(int *num)
 
 	/** 1. 입력 후 정수 또는 문자열인지 검사 */
 	/** 2. 정수면 저장, 문자열이면 어떤 종료 코드인지 확인 */
-	return_value = check_buffer(buf);
+	return_value = check_buffer_is_number(buf);
 	switch (return_value)
 	{
 	/** 숫자를 입력 받은 경우 */
@@ -310,7 +311,7 @@ int input_number(int *num)
 		break;
 	/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 	default:
-		printf("\t| ! [DEBUG] check_buffer 함수에서 알 수 없는 반환값 발생.\n");
+		printf("\t| ! [DEBUG] check_buffer_is_number 함수에서 알 수 없는 반환값 발생.\n");
 		break;
 	}
 
@@ -350,7 +351,7 @@ int input_numbers(input_data_t *data)
 	printf("\t| @ 입력 종료			: q \n");
 	printf("\t| @ 프로그램 종료		: end \n\n");
 
-	clear_numbers(data);
+	clear_input_numbers(data);
 
 	while (1)
 	{
@@ -392,7 +393,7 @@ int input_numbers(input_data_t *data)
 			break;
 			/** 2. 입력한 데이터 초기화 */
 		case CLEAR:
-			clear_numbers(data);
+			clear_input_numbers(data);
 			is_input_again = SUCCESS;
 			break;
 			/** 3. 최대 입력 개수 초과 시 재입력 */
