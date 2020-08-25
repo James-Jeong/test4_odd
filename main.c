@@ -110,7 +110,7 @@ int check_buffer_is_number(char *buf)
 
 	for (; loop_index < buf_size; loop_index++)
 	{
-		/** 해당 문자가 '-'일 경우, 음수를 뜻하므로 예외 검사 후 재진행 */
+		/** 해당 문자가 '-' 또는 '+' 일 경우, 예외 검사 후 재진행 */
 		if ((buf_size > 1) && ((buf[loop_index] == '-') || (buf[loop_index] == '+')))
 		{
 			minus_count++;
@@ -246,6 +246,7 @@ int check_command(const char *code)
 	else
 	{
 		return_value_confirm = confirm_finish_again();
+		/** 명령 실행은 SUCCESS, 취소는 AGAIN */
 		if(return_value_confirm == AGAIN)
 		{
 			return_value_command = return_value_confirm;
@@ -259,7 +260,7 @@ int check_command(const char *code)
  * @fn int convert_string_to_integer( const char *buf)
  * @brief 매개변수로 전달 받은 문자열을 정수로 바꾸는 함수
  * @param buf 정수로 바꿀 문자열 변수
- * @return 성공 시 변환된 정수, 정수 변환 실패 시 FAIL 반환
+ * @return 성공 시 변환된 정수(부호 포함), 정수 변환 실패 시 FAIL 반환
  */
 int convert_string_to_integer(const char *buf)
 {
@@ -311,7 +312,7 @@ int input_number(int *num)
 {
 	/** 함수 진행 성공 여부를 설정할 변수 */
 	int return_value = FAIL;
-	/** 입력 받을 문자열을 담을 변수 */
+	/** 입력 받을 문자열을 담을 문자열 변수, 부호와 널문자를 수용하기 위해 +2 적용 */
 	char buf[MAX_NUMS + 2];
 
 	printf("\n\t| @ 입력 : ");
