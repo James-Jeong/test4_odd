@@ -8,12 +8,15 @@
 //////////////////////////////////////
 // Definitions & Macros
 //////////////////////////////////////
+
 /** 최대 입력 자리수 */
 #define MAX_NUMS 10
 /** 최대 숫자 입력 개수 */
 #define MAX_NINPUT 10
 /** 최소 숫자 입력 개수 */
 #define MIN_NINPUT 5
+/** 디버깅 여부 */
+#define DEBUG 0
 
 /** 함수 반환값 열거형 */
 enum STATUS
@@ -52,6 +55,7 @@ struct input_data_s
 //////////////////////////////////////
 // Local functions
 //////////////////////////////////////
+
 void clear_input_numbers(input_data_t *data);
 int check_buffer_is_number(char *buf);
 int confirm_finish_again(const char *buf);
@@ -89,7 +93,9 @@ int check_buffer_is_number(char *buf)
 	/** 매개변수로 전달 받은 문자열 변수가 NULL 인 경우, return_value 에 FAIL 을 설정한다. */
 	if (buf == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+#endif
 		return FAIL;
 	}
 
@@ -143,7 +149,9 @@ int confirm_finish_again(const char *buf)
 	int return_value = FAIL;
 	if (buf == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+#endif
 		return return_value;
 	}
 
@@ -156,7 +164,9 @@ int confirm_finish_again(const char *buf)
 		printf("\t| @ (y/n) : ");
 		if (scanf_s("%[^\n]", _buf, sizeof(_buf)) <= 0)
 		{
-			printf("\t| ! 잘못된 입력입니다. 문자열 최대 입력 자리수 초과.\n");
+#if DEBUG
+			printf("\t| ! 잘못된 입력. 문자열 최대 입력 자리수 초과.\n");
+#endif
 			continue;
 		}
 
@@ -171,7 +181,7 @@ int confirm_finish_again(const char *buf)
 		}
 		else
 		{
-			printf("\t| ! 잘못된 입력입니다.\n");
+			printf("\t| ! 잘못된 입력.\n");
 		}
 	}
 
@@ -190,7 +200,9 @@ int check_command(const char *code)
 	int return_value = FAIL;
 	if (code == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
+#endif
 		return return_value;
 	}
 
@@ -255,7 +267,7 @@ int convert_buffer_to_integer(const char *buf)
 	/** 문자열이어서 atoi 반환값이 0 인 경우 */
 	if (isdigit(buf[0]) == 0)
 	{
-		printf("\t| ! 정수 변환 실패, atoi 함수 오류.\n");
+		printf("\t| ! 정수 변환 실패.n");
 		return_value = FAIL;
 	}
 	/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
@@ -311,7 +323,9 @@ int input_number(int *num)
 		break;
 	/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 	default:
+#if DEBUG
 		printf("\t| ! [DEBUG] check_buffer_is_number 함수에서 알 수 없는 반환값 발생.\n");
+#endif
 		break;
 	}
 
@@ -336,7 +350,9 @@ int input_numbers(input_data_t *data)
 	/** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
 	if (data == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 입력 실패, 알 수 없는 객체 포인터(NULL).\n");
+#endif
 		return FAIL;
 	}
 
@@ -409,7 +425,9 @@ int input_numbers(input_data_t *data)
 			break;
 		/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 		default:
+#if DEBUG
 			printf("\t| ! [DEBUG] input_number 함수에서 알 수 없는 반환값 발생.\n");
+#endif
 			is_loop_break = SUCCESS;
 			break;
 		}
@@ -447,7 +465,9 @@ void print_current_numbers(input_data_t *data)
 	/** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
 	if (data == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 출력 실패, 알 수 없는 객체 포인터(NULL).\n");
+#endif
 		return;
 	}
 
@@ -479,7 +499,9 @@ void print_odd_numbers(input_data_t *data)
 	/** 구조체 객체 포인터가 NULL 인 경우, 프로그램 종료 */
 	if (data == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 출력 실패, 알 수 없는 객체 포인터(NULL).\n");
+#endif
 		return;
 	}
 
@@ -531,8 +553,10 @@ int main()
 	input_data_t *data = (input_data_t *)malloc(sizeof(input_data_t));
 	if (data == NULL)
 	{
+#if DEBUG
 		printf("\t| ! [DEBUG] 객체 메모리 할당 실패, 프로그램 종료.\n");
 		perror("\t| ! [DEBUG] malloc");
+#endif
 		return FAIL;
 	}
 
@@ -557,7 +581,9 @@ int main()
 			break;
 		/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 		default:
+#if DEBUG
 			printf("\t| ! input_data_input_numbers 함수에서 알 수 없는 반환값 발생.\n");
+#endif
 			break;
 		}
 		break;
