@@ -15,6 +15,8 @@
 #define MAX_NINPUT 10
 /** 최소 숫자 입력 개수 */
 #define MIN_NINPUT 5
+/** 최대 명령어 코드 개수 */
+#define MAX_NCODES 4
 /** 디버깅 여부 */
 #define DEBUG 0
 
@@ -32,14 +34,12 @@ enum STATUS
 	DISPLAY			/** 조회 */
 };
 
-/** 입력 중단 코드 문자열 */
-const char *exit_code = "q";
-/** 입력 초기화 코드 문자열 */
-const char *clear_code = "cls";
-/** 입력 조회 코드 문자열 */
-const char *display_code = "dis";
-/** 프로그램 종료 코드 문자열 */
-const char *finish_code = "end";
+/** 프로그램 명령어 코드 집합 */
+/** 0 : 입력 중단 코드 문자열 */
+/** 1 : 입력 초기화 코드 문자열 */
+/** 2 : 입력 조회 코드 문자열 */
+/** 3 : 프로그램 종료 코드 문자열 */
+const char *codes[] = {"q", "cls", "dis", "end"};
 
 /**
  * @brief input_data_t struct
@@ -58,7 +58,7 @@ struct input_data_s
 
 void clear_input_numbers(input_data_t *data);
 int check_buffer_is_number(char *buf);
-int confirm_finish_again(const char *buf);
+int confirm_finish_again(const char *code);
 int check_command(const char *code);
 int convert_buffer_to_integer(const char *buf);
 int input_number(int *num);
@@ -148,15 +148,19 @@ int check_buffer_is_number(char *buf)
 }
 
 /**
- * @fn int confirm_finish_again(const char *buf)
+ * @fn int confirm_finish_again(const char *code)
  * @brief 종료 또는 초기화 명령 수행 전에 사용자로부터 재확인하는 함수
  * @param code 해당 명령어와 관련된 문자열을 출력할 문자열 변수
- * @return 종료 또는 초기화가 확실하면 AGAIN, 아니면 FAIL
+ * @return 성공 시 해당 명령어의 열거형, 알 수 없는 명령이면 UNKNOWN, 매개변수가 NULL 이면 FAIL 을 반환
  */
-int confirm_finish_again(const char *buf)
+int confirm_finish_again(const char *code)
 {
+	/** 해당 명령어의 열거형을 반환하는 변수 */
 	int return_value = FAIL;
-	if (buf == NULL)
+	/** 반복문 인덱스 변수 */
+	int loop_index = 0;
+
+	if (code == NULL)
 	{
 #if DEBUG
 		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
@@ -164,11 +168,35 @@ int confirm_finish_again(const char *buf)
 		return return_value;
 	}
 
+	for( ; loop_index < MAX_NCODES; loop_index++)
+	{
+		if (strncmp(code, codes[loop_index], MAX_NUMS) == EQUAL)
+		{
+			/** 입력 종료 코드(문자열)를 입력 받은 경우 */
+			if( loop_index == 0) return_value = EXIT;
+			/** 입력 초기화 코드(문자열)를 입력 받은 경우 */
+			else if( loop_index == 1) return_value = CLEAR;
+			/** 입력 조회 코드(문자열)를 입력 받은 경우 */
+			else if( loop_index == 2) return_value = DISPLAY;
+			/** 프로그램 종료 코드(문자열)를 입력 받은 경우 */
+			else if( loop_index == 3) return_value = FINISH;
+			/** 알 수 없는 문자열을 입력 받은 경우 */
+			else return_value = UNKNOWN;
+			break;
+		}
+	}
+
+	/** 입력 조회 코드(문자열)인 경우 재확인하지 않음 */
+	if( return_value == DISPLAY)
+	{
+		return return_value;
+	}
+
 	while (1)
 	{
 		while( getchar() != '\n');
 		char _buf[MAX_NUMS];
-		printf("\n\t| @ %s하시겠습니까?\n", buf);
+		printf("\n\t| @ 계속 진행하시겠습니까?\n");
 		printf("\t| @ (입력된 데이터가 초기화됩니다.)\n");
 		printf("\t| @ (y/n) : ");
 		if (scanf_s("%[^\n]", _buf, sizeof(_buf)) <= 0)
@@ -202,7 +230,7 @@ int confirm_finish_again(const char *buf)
  * @brief 매개변수로 전달 받은 문자열이 어떤 명령어 코드인지 검사하는 함수
  * 종료 코드이면, 해당 명령을 실행하기 전에 사용자 오류를 방지하기 위해 재확인을 받는다.
  * @param code 검사할 문자열 변수
- * @return 성공 시 해당 명령어의 열거형, 문자열 참조 실패 시 FAIL, 알 수 없는 문자열을 입력받으면 UNKNOWN 을 반환
+ * @return 성공 시 해당 명령어의 열거형, 알 수 없는 문자열을 입력받으면 UNKNOWN, 매개변수가 NULL 이면 FAIL 을 반환
  */
 int check_command(const char *code)
 {
@@ -215,45 +243,7 @@ int check_command(const char *code)
 		return return_value;
 	}
 
-	/** 입력 종료 코드(문자열)를 입력 받은 경우 */
-	if (strncmp(code, exit_code, MAX_NUMS) == EQUAL)
-	{
-		return_value = confirm_finish_again("입력 종료");
-		if (return_value != AGAIN)
-		{
-			return_value = EXIT;
-		}
-	}
-	/** 입력 초기화 코드(문자열)를 입력 받은 경우 */
-	else if (strncmp(code, clear_code, MAX_NUMS) == EQUAL)
-	{
-		return_value = confirm_finish_again("입력 초기화");
-		if (return_value != AGAIN)
-		{
-			return_value = CLEAR;
-		}
-	}
-	/** 입력 조회 코드(문자열)를 입력 받은 경우 */
-	else if (strncmp(code, display_code, MAX_NUMS) == EQUAL)
-	{
-		return_value = DISPLAY;
-	}
-	/** 프로그램 종료 코드(문자열)를 입력 받은 경우 */
-	else if (strncmp(code, finish_code, MAX_NUMS) == EQUAL)
-	{
-		return_value = confirm_finish_again("프로그램 종료");
-		if (return_value != AGAIN)
-		{
-			return_value = FINISH;
-		}
-	}
-	/** 입력 종료 코드(문자열)가 아닌 알 수 없는 문자열을 입력 받은 경우 */
-	else
-	{
-		printf("\t| ! 입력 실패, 알 수 없는 입력.\n");
-		return_value = UNKNOWN;
-	}
-
+	return_value = confirm_finish_again( code);
 	return return_value;
 }
 
