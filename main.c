@@ -35,10 +35,10 @@ enum STATUS
 };
 
 /** 프로그램 명령어 코드 집합 */
-/** 0 : 입력 중단 코드 문자열 */
-/** 1 : 입력 초기화 코드 문자열 */
-/** 2 : 입력 조회 코드 문자열 */
-/** 3 : 프로그램 종료 코드 문자열 */
+/** 0(q) : 입력 중단 코드 문자열 */
+/** 1(cls) : 입력 초기화 코드 문자열 */
+/** 2(dis) : 입력 조회 코드 문자열 */
+/** 3(end) : 프로그램 종료 코드 문자열 */
 const char *codes[] = {"q", "cls", "dis", "end"};
 
 /**
@@ -315,7 +315,8 @@ int input_number(int *num)
 	char buf[MAX_NUMS + 2];
 
 	printf("\n\t| @ 입력 : ");
-	if ((scanf_s(" %[^\n]", buf, sizeof(buf)) <= 0) || ((buf[0] != '-') && (strlen(buf) > MAX_NUMS)))
+	if ((scanf_s(" %[^\n]", buf, sizeof(buf)) <= 0) || 
+	(((buf[0] != '-') && (buf[0] != '+')) && (strlen(buf) > MAX_NUMS)))
 	{
 		/** 어떠한 입력도 받지 못하거나 최대 입력 개수를 초과하면 AGAIN 을 반환한다. */
 		while (getchar() != '\n');
