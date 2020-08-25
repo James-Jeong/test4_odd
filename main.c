@@ -111,7 +111,7 @@ int check_buffer_is_number(char *buf)
 	for (; loop_index < buf_size; loop_index++)
 	{
 		/** 해당 문자가 '-'일 경우, 음수를 뜻하므로 예외 검사 후 재진행 */
-		if ((buf[loop_index] == '-') || (buf[loop_index] == '+'))
+		if ((buf_size > 1) && ((buf[loop_index] == '-') || (buf[loop_index] == '+')))
 		{
 			minus_count++;
 			/** 아래의 경우에 해당되면 잘못된 음의 정수이므로 return_value 에 FAIL 을 설정한다. */
@@ -120,7 +120,7 @@ int check_buffer_is_number(char *buf)
 			/** 3) '-' 문자가 두 번 이상 카운트되는 경우 */
 			/** 4) '-' 문자와 숫자 사이에 white space 문자가 있는 경우 */
 			if (((loop_index > 0) && (isdigit(buf[loop_index + 1])) != 0) || 
-				(buf[loop_index + 1] == '\n') || 
+				(buf[loop_index + 1] == '\0') || 
 				(minus_count > 1) || 
 				((loop_index > 0) && (isspace(buf[loop_index + 1])) != 0))
 			{
@@ -180,16 +180,20 @@ int confirm_finish_again(const char *code)
 			else if( loop_index == 2) return_value = DISPLAY;
 			/** 프로그램 종료 코드(문자열)를 입력 받은 경우 */
 			else if( loop_index == 3) return_value = FINISH;
-			/** 알 수 없는 문자열을 입력 받은 경우 */
-			else return_value = UNKNOWN;
 			break;
 		}
 	}
 
 	/** 입력 조회 코드(문자열)인 경우 재확인하지 않음 */
-	if( return_value == DISPLAY)
+	if(return_value == DISPLAY)
 	{
 		return return_value;
+	}
+	/** 알 수 없는 문자열을 입력 받은 경우 입력 재진행 */
+	else if(return_value == FAIL)
+	{
+		printf("\t| ! 알 수 없는 입력.\n");
+		return UNKNOWN;
 	}
 
 	while (1)
@@ -218,7 +222,7 @@ int confirm_finish_again(const char *code)
 		}
 		else
 		{
-			printf("\t| ! 잘못된 입력.\n");
+			printf("\t| ! 알 수 없는 입력.\n");
 		}
 	}
 
@@ -270,6 +274,12 @@ int convert_string_to_integer(const char *buf)
 
 	while(*buf != 0)
 	{
+		if(*buf == '+')
+		{
+			buf++;
+			continue;
+		}
+
 		number = (number * 10) + (*buf - '0');
 		if(number < 0)
 		{
