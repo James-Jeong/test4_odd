@@ -58,7 +58,7 @@ struct input_data_s
 
 void clear_input_numbers(input_data_t *data);
 int check_buffer_is_number(char *buf);
-int confirm_finish_again(const char *code);
+int confirm_finish_again();
 int check_command(const char *code);
 int convert_buffer_to_integer(const char *buf);
 int input_number(int *num);
@@ -148,53 +148,14 @@ int check_buffer_is_number(char *buf)
 }
 
 /**
- * @fn int confirm_finish_again(const char *code)
+ * @fn int confirm_finish_again()
  * @brief 종료 또는 초기화 명령 수행 전에 사용자로부터 재확인하는 함수
- * @param code 해당 명령어와 관련된 문자열을 출력할 문자열 변수
- * @return 성공 시 해당 명령어의 열거형, 알 수 없는 명령이면 UNKNOWN, 매개변수가 NULL 이면 FAIL 을 반환
+ * @return 명령을 실행하면 SUCCESS, 실행하지 않으면 AGAIN 을 반환
  */
-int confirm_finish_again(const char *code)
+int confirm_finish_again()
 {
-	/** 해당 명령어의 열거형을 반환하는 변수 */
-	int return_value = FAIL;
-	/** 반복문 인덱스 변수 */
-	int loop_index = 0;
-
-	if (code == NULL)
-	{
-#if DEBUG
-		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
-#endif
-		return return_value;
-	}
-
-	for( ; loop_index < MAX_NCODES; loop_index++)
-	{
-		if (strncmp(code, codes[loop_index], MAX_NUMS) == EQUAL)
-		{
-			/** 입력 종료 코드(문자열)를 입력 받은 경우 */
-			if( loop_index == 0) return_value = EXIT;
-			/** 입력 초기화 코드(문자열)를 입력 받은 경우 */
-			else if( loop_index == 1) return_value = CLEAR;
-			/** 입력 조회 코드(문자열)를 입력 받은 경우 */
-			else if( loop_index == 2) return_value = DISPLAY;
-			/** 프로그램 종료 코드(문자열)를 입력 받은 경우 */
-			else if( loop_index == 3) return_value = FINISH;
-			break;
-		}
-	}
-
-	/** 입력 조회 코드(문자열)인 경우 재확인하지 않음 */
-	if(return_value == DISPLAY)
-	{
-		return return_value;
-	}
-	/** 알 수 없는 문자열을 입력 받은 경우 입력 재진행 */
-	else if(return_value == FAIL)
-	{
-		printf("\t| ! 알 수 없는 입력.\n");
-		return UNKNOWN;
-	}
+	/** 재확인 응답을 반환받는 변수 */
+	int return_value = SUCCESS;
 
 	while (1)
 	{
@@ -234,21 +195,64 @@ int confirm_finish_again(const char *code)
  * @brief 매개변수로 전달 받은 문자열이 어떤 명령어 코드인지 검사하는 함수
  * 종료 코드이면, 해당 명령을 실행하기 전에 사용자 오류를 방지하기 위해 재확인을 받는다.
  * @param code 검사할 문자열 변수
- * @return 성공 시 해당 명령어의 열거형, 알 수 없는 문자열을 입력받으면 UNKNOWN, 매개변수가 NULL 이면 FAIL 을 반환
+ * @return 성공 시 해당 명령어의 열거형, 입력 재진행 시 AGAIN, 
+ * 알 수 없는 문자열을 입력받으면 UNKNOWN, 매개변수가 NULL 이면 FAIL 을 반환
  */
 int check_command(const char *code)
 {
-	int return_value = FAIL;
+	/** 해당 명령어의 열거형을 반환하는 변수 */
+	int return_value_command = FAIL;
+	/** 재확인 응답을 반환받는 변수 */
+	int return_value_confirm = FAIL;
+	/** 반복문 인덱스 변수 */
+	int loop_index = 0;
+
 	if (code == NULL)
 	{
 #if DEBUG
 		printf("\t| ! [DEBUG] 알 수 없는 문자열 포인터(NULL).\n");
 #endif
-		return return_value;
+		return return_value_command;
 	}
 
-	return_value = confirm_finish_again( code);
-	return return_value;
+	for( ; loop_index < MAX_NCODES; loop_index++)
+	{
+		if (strncmp(code, codes[loop_index], MAX_NUMS) == EQUAL)
+		{
+			/** 입력 종료 코드를 입력 받은 경우 */
+			if( loop_index == 0) return_value_command = EXIT;
+			/** 입력 초기화 코드를 입력 받은 경우 */
+			else if( loop_index == 1) return_value_command = CLEAR;
+			/** 입력 조회 코드를 입력 받은 경우 */
+			else if( loop_index == 2) return_value_command = DISPLAY;
+			/** 프로그램 종료 코드를 입력 받은 경우 */
+			else if( loop_index == 3) return_value_command = FINISH;
+			break;
+		}
+	}
+
+	/** 입력 조회 코드인 경우 재확인하지 않음 */
+	if(return_value_command == DISPLAY)
+	{
+		return return_value_command;
+	}
+	/** 알 수 없는 문자열을 입력 받은 경우 입력 재진행 */
+	else if(return_value_command == FAIL)
+	{
+		printf("\t| ! 알 수 없는 입력.\n");
+		return_value_command = UNKNOWN;
+	}
+	/** 다른 모든 코드인 경우 재확인 진행 */
+	else
+	{
+		return_value_confirm = confirm_finish_again();
+		if(return_value_confirm == AGAIN)
+		{
+			return_value_command = return_value_confirm;
+		}
+	}
+
+	return return_value_command;
 }
 
 /**
