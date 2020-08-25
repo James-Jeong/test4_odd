@@ -101,6 +101,8 @@ int check_buffer_is_number(char *buf)
 
 	/** 음수 기호 카운트 변수 */
 	int minus_count = 0;
+	/** 정수 개수 카운트 변수 */
+	int num_count = 0;
 	/** 반복문 인덱스 변수 */
 	size_t loop_index = 0;
 	/** 전달 받은 문자열의 길이 변수 */
@@ -108,8 +110,8 @@ int check_buffer_is_number(char *buf)
 
 	for (; loop_index < buf_size; loop_index++)
 	{
-		/** 해당 문자가 '-'일 경우, 음수를 뜻하므로 계속 진행 */
-		if (buf[loop_index] == '-')
+		/** 해당 문자가 '-'일 경우, 음수를 뜻하므로 예외 검사 후 재진행 */
+		if ((buf[loop_index] == '-') || (buf[loop_index] == '+'))
 		{
 			minus_count++;
 			/** 아래의 경우에 해당되면 잘못된 음의 정수이므로 return_value 에 FAIL 을 설정한다. */
@@ -133,8 +135,15 @@ int check_buffer_is_number(char *buf)
 			return_value = FAIL;
 			break;
 		}
+		/** 위 조건들을 모두 통과한 문자인 경우 정수이므로 정수 개수 하나 증가 */
+		num_count++;
 	}
 
+	/** 카운트된 정수 개수가 0 개이면 FAIL 을 반환 */
+	if( num_count == 0)
+	{
+		return_value = FAIL;
+	}
 	return return_value;
 }
 
@@ -249,34 +258,41 @@ int check_command(const char *code)
 }
 
 /**
- * @fn int convert_buffer_to_integer( const char *buf)
+ * @fn int convert_string_to_integer( const char *buf)
  * @brief 매개변수로 전달 받은 문자열을 정수로 바꾸는 함수
  * @param buf 정수로 바꿀 문자열 변수
  * @return 성공 시 변환된 정수, 정수 변환 실패 시 FAIL 반환
  */
-int convert_buffer_to_integer(const char *buf)
+int convert_string_to_integer(const char *buf)
 {
-	int return_value = FAIL;
-	int number = atoi(buf);
-	if (number != 0)
-	{
-		return_value = number;
-		return return_value;
-	}
+	int number = 0;
+	int number_sign = 0;
 
-	/** 문자열이어서 atoi 반환값이 0 인 경우 */
-	if (isdigit(buf[0]) == 0)
+	if(*buf == '-')
 	{
-		printf("\t| ! 정수 변환 실패.n");
-		return_value = FAIL;
+		number_sign = -1;
+		buf++;
 	}
-	/** 실제로 입력값이 0 이어서 atoi 반환값이 0 인 경우 */
 	else
 	{
-		return_value = number;
+		number_sign = 1;
 	}
 
-	return return_value;
+	while(*buf != 0)
+	{
+		number = (number * 10) + (*buf - '0');
+		if(number < 0)
+		{
+#if DEBUG
+			printf("\t| ! [DEBUG] 최대값보다 큰 값 입력, 정수 최대값으로 초기화됨.\n");
+#endif
+			number = INT_MAX;
+			break;
+		}
+		buf++;
+	}
+
+	return number_sign * number;
 }
 
 /**
@@ -292,12 +308,12 @@ int input_number(int *num)
 	/** 함수 진행 성공 여부를 설정할 변수 */
 	int return_value = FAIL;
 	/** 입력 받을 문자열을 담을 변수 */
-	char buf[MAX_NUMS + 1];
+	char buf[MAX_NUMS + 2];
 
 	printf("\n\t| @ 입력 : ");
-	if (scanf_s(" %[^\n]", buf, sizeof(buf)) <= 0)
+	if ((scanf_s(" %[^\n]", buf, sizeof(buf)) <= 0) || ((buf[0] != '-') && (strlen(buf) > MAX_NUMS)))
 	{
-		/** 어떠한 입력도 받지 못하거나 오류가 발생하면 재입력을 위해 AGAIN 을 반환한다. */
+		/** 어떠한 입력도 받지 못하거나 최대 입력 개수를 초과하면 AGAIN 을 반환한다. */
 		while (getchar() != '\n');
 		memset(buf, 0, sizeof(buf));
 		printf("\t| ! 입력 재진행, 최대 입력 개수 초과.\n");
@@ -311,11 +327,7 @@ int input_number(int *num)
 	{
 	/** 숫자를 입력 받은 경우 */
 	case SUCCESS:
-		*num = convert_buffer_to_integer(buf);
-		if (*num >= INT_MAX)
-		{
-			*num = FAIL;
-		}
+		*num = convert_string_to_integer(buf);
 		break;
 	/** 문자열을 입력 받은 경우 */
 	case FAIL:
