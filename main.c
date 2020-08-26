@@ -57,7 +57,7 @@ struct input_data_s
 //////////////////////////////////////
 
 void clear_input_numbers(input_data_t *data);
-int check_buffer_is_number(char *buf);
+int check_buffer_is_number( const char *buf);
 int confirm_finish_again();
 int check_command(const char *code);
 int convert_buffer_to_integer(const char *buf);
@@ -80,12 +80,12 @@ void clear_input_numbers(input_data_t *data)
 }
 
 /**
- * @fn int check_buffer_is_number( char *buf)
+ * @fn int check_buffer_is_number( const char *buf)
  * @brief 매개변수로 전달 받은 문자열이 정수인지 확인하는 함수
  * @param buf 정수인지 확인할 문자열 변수
  * @return 문자열이 정수인지 검사 여부 반환. 성공 시 SUCCESS, 실패 시 FAIL 반환
  */
-int check_buffer_is_number(char *buf)
+int check_buffer_is_number( const char *buf)
 {
 	/** 검사 성공 여부를 설정할 변수 */
 	int return_value = SUCCESS;
