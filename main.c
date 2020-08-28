@@ -600,7 +600,7 @@ int main()
 		/** return_value 가 해당 함수 로직에서 설정한 반환값이 아닌 경우 */
 		default:
 #if DEBUG
-			printf("\t| ! input_data_input_numbers 함수에서 알 수 없는 반환값 발생.\n");
+			printf("\t| ! [DEBUG] input_numbers 함수에서 알 수 없는 반환값 발생.\n");
 #endif
 			break;
 		}
